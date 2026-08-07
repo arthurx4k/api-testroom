@@ -16,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/questoes")
 @Tag(name = "Questão")
+@CrossOrigin(origins= "(*)")
 public class QuestaoController {
 
     @Autowired

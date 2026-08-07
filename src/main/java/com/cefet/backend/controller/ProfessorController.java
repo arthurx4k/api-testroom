@@ -20,6 +20,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/professores")
 @Tag(name = "Professor")
+@CrossOrigin(origins= "(*)")
 public class ProfessorController {
 
     @Autowired
