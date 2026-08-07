@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 @RestController
 @Tag(name = "Autenticação")
-@CrossOrigin(origins= "(*)")
+@CrossOrigin(origins= "*")
 public class AutenticacaoController {
 
      @Autowired

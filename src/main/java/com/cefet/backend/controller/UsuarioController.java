@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 @RestController
 @RequestMapping("/usuarios")
 @Tag(name = "Usuário")
-@CrossOrigin(origins= "(*)")
+@CrossOrigin(origins= "*")
 public class UsuarioController {
 
     @Autowired
