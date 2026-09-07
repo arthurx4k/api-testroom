@@ -42,6 +42,9 @@ public class Atividade {
     @Column(name = "data_geracao")
     private LocalDateTime dataGeracao;
 
+    @Column(name = "quantidade_versoes")
+    private Integer quantidadeVersoes = 1;
+
     @OneToMany(mappedBy = "atividade", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<QuestaoAtividade> questoes = new ArrayList<>();
 }

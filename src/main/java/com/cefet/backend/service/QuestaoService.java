@@ -53,8 +53,7 @@ public class QuestaoService {
         questao.setProfessor(professor);
         questao.setTipoQuestao(dto.getTipoQuestao());
         questao.setEnunciado(dto.getEnunciado());
-        questao.setValorPontos(dto.getValorPontos() != null ? dto.getValorPontos() : BigDecimal.ONE);
-        questao.setCriadoPor(professor.getNome()); // automático
+        questao.setCriadoPor(professor.getNome()); 
 
         questao = questaoRepository.save(questao);
 
@@ -119,7 +118,6 @@ public class QuestaoService {
         questao.setCategorias(new java.util.HashSet<>(categorias));
 
         questao.setEnunciado(dto.getEnunciado());
-        questao.setValorPontos(dto.getValorPontos() != null ? dto.getValorPontos() : BigDecimal.ONE);
 
         if (dto.getTipoQuestao() != questao.getTipoQuestao()) {
             throw new BusinessException("Não é permitido alterar o tipo da questão.");

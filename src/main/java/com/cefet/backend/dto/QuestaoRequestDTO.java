@@ -24,9 +24,6 @@ public class QuestaoRequestDTO {
     @NotBlank(message = "Enunciado é obrigatório")
     private String enunciado;
 
-    @Positive(message = "Valor de pontos deve ser maior que zero")
-    private BigDecimal valorPontos = BigDecimal.ONE;
-
     @NotNull(message = "É necessário selecionar pelo menos uma categoria")
     private List<Long> categoriaIds = new ArrayList<>();
 

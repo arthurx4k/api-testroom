@@ -38,9 +38,6 @@ public class Questao {
     @Column(name = "criado_por", length = 255)
     private String criadoPor;
 
-    @Column(name = "valor_pontos", nullable = false, precision = 3, scale = 2)
-    private BigDecimal valorPontos = BigDecimal.ONE;
-
     @OneToMany(mappedBy = "questao", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Alternativa> alternativas = new ArrayList<>();
 
