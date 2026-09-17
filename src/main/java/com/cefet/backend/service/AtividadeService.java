@@ -2,6 +2,7 @@ package com.cefet.backend.service;
 
 import com.cefet.backend.dto.AtividadeComQuestoesRequestDTO;
 import com.cefet.backend.dto.AtividadeRequestDTO;
+import com.cefet.backend.dto.AtividadeResumoDTO;
 import com.cefet.backend.entity.Alternativa;
 import com.cefet.backend.entity.Atividade;
 import com.cefet.backend.entity.Professor;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -118,6 +120,8 @@ public class AtividadeService {
             }
         }
 
+        String grupoId = UUID.randomUUID().toString();
+
         int qtdVersoes = dto.getQuantidadeVersoes() != null && dto.getQuantidadeVersoes() > 0
                 ? dto.getQuantidadeVersoes()
                 : 1;
@@ -133,6 +137,7 @@ public class AtividadeService {
             atividade.setProfessor(professor);
             atividade.setDataGeracao(LocalDateTime.now());
             atividade.setQuantidadeVersoes(qtdVersoes);
+            atividade.setGrupoId(grupoId);
             atividade.setValorPontos(BigDecimal.ZERO);
             atividade = atividadeRepository.save(atividade);
 
@@ -152,7 +157,9 @@ public class AtividadeService {
                 qa.setAtividade(atividade);
                 qa.setQuestao(q);
                 qa.setPosicao(pos++);
-                qa.setValorPontos(BigDecimal.valueOf(sel.getValorPontos()));
+                qa.setValorPontos(sel.getValorPontos() != null
+                        ? sel.getValorPontos()
+                        : BigDecimal.ONE);
 
                 List<Long> altIds = q.getAlternativas().stream()
                         .map(Alternativa::getId)
@@ -174,8 +181,26 @@ public class AtividadeService {
             atividade = atividadeRepository.save(atividade);
 
             versoes.add(atividade);
+
         }
 
         return versoes;
+    }
+
+    @Transactional(readOnly = true)
+    public List<AtividadeResumoDTO> listarPorProfessor(Long professorId) {
+        Professor professor = professorRepository.findById(professorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Professor não encontrado"));
+        return atividadeRepository.findByProfessorOrderByDataGeracaoDesc(professor).stream()
+                .map(AtividadeResumoDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void excluir(Long id) {
+        if (!atividadeRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Atividade não encontrada. Id: " + id);
+        }
+        atividadeRepository.deleteById(id);
     }
 }

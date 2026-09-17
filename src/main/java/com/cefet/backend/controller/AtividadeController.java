@@ -3,6 +3,7 @@ package com.cefet.backend.controller;
 import com.cefet.backend.dto.AtividadeComQuestoesRequestDTO;
 import com.cefet.backend.dto.AtividadeRequestDTO;
 import com.cefet.backend.dto.AtividadeResponseDTO;
+import com.cefet.backend.dto.AtividadeResumoDTO;
 import com.cefet.backend.entity.Atividade;
 import com.cefet.backend.service.AtividadeService;
 import com.cefet.backend.service.PdfService;
@@ -69,5 +70,18 @@ public class AtividadeController {
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.setContentDispositionFormData("attachment", "gabarito_" + id + ".pdf");
         return ResponseEntity.ok().headers(headers).body(pdf);
+    }
+
+    @GetMapping
+    @Operation(summary = "Listar atividades de um professor")
+    public ResponseEntity<List<AtividadeResumoDTO>> listar(@RequestParam Long professorId) {
+        return ResponseEntity.ok(atividadeService.listarPorProfessor(professorId));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Excluir atividade")
+    public ResponseEntity<Void> excluir(@PathVariable Long id) {
+        atividadeService.excluir(id);
+        return ResponseEntity.noContent().build();
     }
 }

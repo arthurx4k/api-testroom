@@ -45,6 +45,9 @@ public class Atividade {
     @Column(name = "quantidade_versoes")
     private Integer quantidadeVersoes = 1;
 
+    @Column(name = "grupo_id", length = 36)
+    private String grupoId;
+
     @OneToMany(mappedBy = "atividade", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<QuestaoAtividade> questoes = new ArrayList<>();
 }
