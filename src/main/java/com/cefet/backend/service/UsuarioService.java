@@ -9,6 +9,7 @@ import com.cefet.backend.exception.BusinessException;
 import com.cefet.backend.repository.ProfessorRepository;
 import com.cefet.backend.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,8 @@ public class UsuarioService {
     @Autowired
     private ProfessorRepository professorRepository;
 
+    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
     @Transactional
     public UsuarioResponseDTO criar(UsuarioRequestDTO dto) {
         if (usuarioRepository.findByEmail(dto.getEmail()) != null) {
@@ -29,7 +32,7 @@ public class UsuarioService {
 
         Usuario usuario = new Usuario();
         usuario.setEmail(dto.getEmail());
-        usuario.setSenha(dto.getSenha());
+        usuario.setSenha(encoder.encode(dto.getSenha()));
         usuario.setCargo(dto.getCargo());
 
         usuario = usuarioRepository.save(usuario);

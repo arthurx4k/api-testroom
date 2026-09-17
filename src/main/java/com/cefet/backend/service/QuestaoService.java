@@ -53,7 +53,7 @@ public class QuestaoService {
         questao.setProfessor(professor);
         questao.setTipoQuestao(dto.getTipoQuestao());
         questao.setEnunciado(dto.getEnunciado());
-        questao.setCriadoPor(professor.getNome()); 
+        questao.setCriadoPor(professor.getNome());
 
         questao = questaoRepository.save(questao);
 
@@ -160,6 +160,28 @@ public class QuestaoService {
         }
         List<Questao> questoes = questaoRepository.findByCategorias_Id(categoriaId);
         return questoes.stream().map(QuestaoResponseDTO::new).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<QuestaoResponseDTO> listarPorCategorias(List<Long> categoriaIds, Long professorId) {
+        if (categoriaIds == null || categoriaIds.isEmpty()) {
+            return listarPorProfessor(professorId);
+        }
+        Professor professor = professorRepository.findById(professorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Professor não encontrado."));
+
+        List<Categoria> categorias = categoriaRepository.findAllById(categoriaIds);
+        for (Categoria cat : categorias) {
+            if (!cat.getCriador().equals(professor) && !cat.getCompartilhadaCom().contains(professor)) {
+                throw new BusinessException("Sem acesso à categoria " + cat.getId());
+            }
+        }
+
+        return questaoRepository.findByCategoriasIdIn(categoriaIds).stream()
+                .filter(q -> q.getProfessor().equals(professor)
+                        || q.getCategorias().stream().anyMatch(c -> c.getCompartilhadaCom().contains(professor)))
+                .map(QuestaoResponseDTO::new)
+                .collect(Collectors.toList());
     }
 
     @Transactional

@@ -31,6 +31,9 @@ public class QuestaoAtividade {
     @Column(name = "posicao_questao", nullable = false)
     private Integer posicao;
 
-    @Column(name = "valor_pontos", nullable = false, precision = 3, scale = 2)
+    @Column(name = "valor_pontos", nullable = false, precision = 5, scale = 2)
     private BigDecimal valorPontos;
+
+    @Column(name = "ordem_alternativas", length = 500)
+    private String ordemAlternativas;
 }

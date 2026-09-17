@@ -1,5 +1,6 @@
 package com.cefet.backend.dto;
 
+import com.cefet.backend.entity.Alternativa;
 import com.cefet.backend.entity.Atividade;
 import com.cefet.backend.entity.QuestaoAtividade;
 import lombok.Getter;
@@ -8,7 +9,9 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,6 +40,7 @@ public class AtividadeResponseDTO {
         this.dataGeracao = atividade.getDataGeracao();
         if (atividade.getQuestoes() != null) {
             this.questoes = atividade.getQuestoes().stream()
+                    .sorted(Comparator.comparing(QuestaoAtividade::getPosicao))
                     .map(QuestaoAtividadeDTO::new)
                     .collect(Collectors.toList());
         }
@@ -57,11 +61,24 @@ public class AtividadeResponseDTO {
             this.enunciado = qa.getQuestao().getEnunciado();
             this.posicao = qa.getPosicao();
             this.valorPontos = qa.getValorPontos();
+
             if (qa.getQuestao().getAlternativas() != null) {
-                this.alternativas = qa.getQuestao().getAlternativas().stream()
-                        .map(alt -> new AlternativaDTO(alt))
+                List<Alternativa> alts = new ArrayList<>(qa.getQuestao().getAlternativas());
+                String ordemStr = qa.getOrdemAlternativas();
+                if (ordemStr != null && !ordemStr.isBlank()) {
+                    List<Long> ordemIds = Arrays.stream(ordemStr.split(","))
+                            .map(String::trim)
+                            .filter(s -> !s.isEmpty())
+                            .map(Long::parseLong)
+                            .collect(Collectors.toList());
+                    alts.sort(Comparator.comparingInt(a -> {
+                        int idx = ordemIds.indexOf(a.getId());
+                        return idx >= 0 ? idx : Integer.MAX_VALUE;
+                    }));
+                }
+                this.alternativas = alts.stream()
+                        .map(AlternativaDTO::new)
                         .collect(Collectors.toList());
-                Collections.shuffle(this.alternativas);
             }
         }
     }
@@ -73,10 +90,9 @@ public class AtividadeResponseDTO {
         private Long id;
         private String texto;
 
-        public AlternativaDTO(com.cefet.backend.entity.Alternativa alt) {
+        public AlternativaDTO(Alternativa alt) {
             this.id = alt.getId();
             this.texto = alt.getTexto();
-            
         }
     }
 }

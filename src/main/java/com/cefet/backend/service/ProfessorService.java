@@ -89,6 +89,14 @@ public class ProfessorService {
     }
 
     @Transactional
+    public Professor atualizarFoto(Long id, String fotoUrl) {
+        Professor professor = professorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Professor não encontrado"));
+        professor.setFoto(fotoUrl);
+        return professorRepository.save(professor);
+    }
+
+    @Transactional
     public void deletar(Long id) {
         if (!professorRepository.existsById(id)) {
             throw new ResourceNotFoundException("Professor com ID " + id + " não encontrado");

@@ -16,12 +16,11 @@ import com.cefet.backend.service.ProfessorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 @RestController
 @RequestMapping("/professores")
 @Tag(name = "Professor")
-@CrossOrigin(origins= "*")
+@CrossOrigin(origins = "*")
 public class ProfessorController {
 
     @Autowired
@@ -72,10 +71,12 @@ public class ProfessorController {
     }
 
     @PutMapping("/{id}/foto")
+    @Operation(summary = "Atualizar a foto de perfil do professor")
     public ResponseEntity<Map<String, String>> atualizarFoto(@PathVariable Long id,
             @RequestBody Map<String, String> payload) {
         String fotoUrl = payload.get("fotoUrl");
-        return ResponseEntity.ok(Map.of("foto", fotoUrl));
+        Professor professor = professorService.atualizarFoto(id, fotoUrl);
+        return ResponseEntity.ok(Map.of("foto", professor.getFoto() != null ? professor.getFoto() : ""));
     }
 
     @DeleteMapping("/{id}")

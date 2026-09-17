@@ -59,4 +59,15 @@ public class AtividadeController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(versoes.stream().map(AtividadeResponseDTO::new).collect(Collectors.toList()));
     }
+
+    @GetMapping("/{id}/gabarito")
+    @Operation(summary = "Exportar gabarito da atividade para PDF")
+    public ResponseEntity<byte[]> exportarGabarito(@PathVariable Long id) throws IOException {
+        Atividade atividade = atividadeService.buscarPorId(id);
+        byte[] pdf = pdfService.gerarGabarito(atividade);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("attachment", "gabarito_" + id + ".pdf");
+        return ResponseEntity.ok().headers(headers).body(pdf);
+    }
 }

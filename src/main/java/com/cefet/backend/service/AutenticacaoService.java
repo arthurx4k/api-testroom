@@ -9,6 +9,7 @@ import com.cefet.backend.exception.BusinessException;
 import com.cefet.backend.repository.ProfessorRepository;
 import com.cefet.backend.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,10 +22,12 @@ public class AutenticacaoService {
     @Autowired
     private ProfessorRepository professorRepository;
 
+    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
     @Transactional
     public AutenticacaoResponseDTO autenticar(AutenticacaoRequestDTO dto) {
-        Usuario usuario = usuarioRepository.findByEmailAndSenha(dto.getEmail(), dto.getSenha());
-        if (usuario == null) {
+        Usuario usuario = usuarioRepository.findByEmail(dto.getEmail());
+        if (usuario == null || !encoder.matches(dto.getSenha(), usuario.getSenha())) {
             throw new BusinessException("Login e/ou senha inválidos.");
         }
 
@@ -38,5 +41,4 @@ public class AutenticacaoService {
         }
         return response;
     }
-    
 }

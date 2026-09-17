@@ -10,14 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/questoes")
 @Tag(name = "Questão")
-@CrossOrigin(origins= "*")
+@CrossOrigin(origins = "*")
 public class QuestaoController {
 
     @Autowired
@@ -69,5 +68,13 @@ public class QuestaoController {
             @RequestParam Long professorId) {
         questaoService.excluir(id, professorId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/por-categorias")
+    @Operation(summary = "Listar questões de várias categorias (múltiplos IDs separados por vírgula)")
+    public ResponseEntity<List<QuestaoResponseDTO>> listarPorCategorias(
+            @RequestParam List<Long> categoriaIds,
+            @RequestParam Long professorId) {
+        return ResponseEntity.ok(questaoService.listarPorCategorias(categoriaIds, professorId));
     }
 }
