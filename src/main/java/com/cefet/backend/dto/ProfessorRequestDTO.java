@@ -20,4 +20,6 @@ public class ProfessorRequestDTO {
     private String especialidade;
 
     private String descricao;
+
+    private String foto;
 }

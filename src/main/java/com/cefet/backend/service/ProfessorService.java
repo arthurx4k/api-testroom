@@ -53,14 +53,16 @@ public class ProfessorService {
 
     public ProfessorResponseDTO buscarPorId(Long id) {
         Professor professor = professorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Professor com ID " + id + " não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Professor com ID " + id + " não encontrado"));
         return new ProfessorResponseDTO(professor);
     }
 
     @Transactional
     public ProfessorResponseDTO atualizar(Long id, ProfessorRequestDTO dto) {
         Professor professor = professorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Professor com ID " + id + " não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Professor com ID " + id + " não encontrado"));
 
         if (dto.getUsuarioId() != null && !dto.getUsuarioId().equals(professor.getUsuario().getId())) {
             Usuario novoUsuario = usuarioRepository.findById(dto.getUsuarioId())
@@ -81,19 +83,21 @@ public class ProfessorService {
     }
 
     @Transactional
-    public Professor atualizarNome(Long id, String nome) {
+    public ProfessorResponseDTO atualizarNome(Long id, String nome) {
         Professor professor = professorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Professor não encontrado"));
         professor.setNome(nome);
-        return professorRepository.save(professor);
+        professor = professorRepository.save(professor);
+        return new ProfessorResponseDTO(professor);
     }
 
     @Transactional
-    public Professor atualizarFoto(Long id, String fotoUrl) {
+    public ProfessorResponseDTO atualizarFoto(Long id, String fotoUrl) {
         Professor professor = professorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Professor não encontrado"));
         professor.setFoto(fotoUrl);
-        return professorRepository.save(professor);
+        professor = professorRepository.save(professor);
+        return new ProfessorResponseDTO(professor);
     }
 
     @Transactional

@@ -2,6 +2,7 @@ package com.cefet.backend.controller;
 
 import com.cefet.backend.dto.CategoriaRequestDTO;
 import com.cefet.backend.dto.CategoriaResponseDTO;
+import com.cefet.backend.dto.CompartilhamentoPendenteDTO;
 import com.cefet.backend.service.CategoriaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,14 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/categorias")
 @Tag(name = "Categoria")
-@CrossOrigin(origins= "*")
+@CrossOrigin(origins = "*")
 public class CategoriaController {
 
     @Autowired
@@ -63,16 +63,6 @@ public class CategoriaController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{categoriaId}/compartilhar/{professorAlvoId}")
-    @Operation(summary = "Compartilhar categoria com outro professor")
-    public ResponseEntity<Void> compartilhar(
-            @PathVariable Long categoriaId,
-            @PathVariable Long professorAlvoId,
-            @RequestParam Long professorOrigemId) {
-        categoriaService.compartilhar(categoriaId, professorAlvoId, professorOrigemId);
-        return ResponseEntity.ok().build();
-    }
-
     @DeleteMapping("/{categoriaId}/compartilhar/{professorAlvoId}")
     @Operation(summary = "Remover compartilhamento de categoria")
     public ResponseEntity<Void> descompartilhar(
@@ -81,5 +71,31 @@ public class CategoriaController {
             @RequestParam Long professorOrigemId) {
         categoriaService.descompartilhar(categoriaId, professorAlvoId, professorOrigemId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/compartilhar")
+    public ResponseEntity<Void> compartilhar(
+            @PathVariable Long id,
+            @RequestParam Long professorId,
+            @RequestParam Long professorAlvoId) {
+        categoriaService.compartilhar(id, professorId, professorAlvoId);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/compartilhamentos-pendentes")
+    public ResponseEntity<List<CompartilhamentoPendenteDTO>> pendentes(@RequestParam Long professorId) {
+        return ResponseEntity.ok(categoriaService.listarPendentes(professorId));
+    }
+
+    @PostMapping("/compartilhamentos/{id}/aceitar")
+    public ResponseEntity<Void> aceitar(@PathVariable Long id, @RequestParam Long professorId) {
+        categoriaService.aceitar(id, professorId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/compartilhamentos/{id}/recusar")
+    public ResponseEntity<Void> recusar(@PathVariable Long id, @RequestParam Long professorId) {
+        categoriaService.recusar(id, professorId);
+        return ResponseEntity.ok().build();
     }
 }

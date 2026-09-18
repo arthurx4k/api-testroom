@@ -1,7 +1,6 @@
 package com.cefet.backend.controller;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import com.cefet.backend.dto.ProfessorRequestDTO;
 import com.cefet.backend.dto.ProfessorResponseDTO;
-import com.cefet.backend.entity.Professor;
 import com.cefet.backend.service.ProfessorService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,54 +27,49 @@ public class ProfessorController {
     @PostMapping
     @Operation(summary = "Criar um novo professor")
     public ResponseEntity<ProfessorResponseDTO> criar(@Valid @RequestBody ProfessorRequestDTO dto) {
-        ProfessorResponseDTO response = professorService.criar(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(professorService.criar(dto));
     }
 
     @GetMapping
     @Operation(summary = "Listar todos os professores")
     public ResponseEntity<List<ProfessorResponseDTO>> listarTodos() {
-        List<ProfessorResponseDTO> lista = professorService.listarTodos();
-        return ResponseEntity.ok(lista);
-    }
-
-    @GetMapping("/{id}")
-    @Operation(summary = "Buscar professor por ID")
-    public ResponseEntity<ProfessorResponseDTO> buscarPorId(@PathVariable Long id) {
-        ProfessorResponseDTO response = professorService.buscarPorId(id);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(professorService.listarTodos());
     }
 
     @GetMapping("/perfil")
     @Operation(summary = "Obter perfil do professor logado")
     public ResponseEntity<ProfessorResponseDTO> obterPerfil(@RequestParam Long professorId) {
-        ProfessorResponseDTO response = professorService.buscarPorId(professorId);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(professorService.buscarPorId(professorId));
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Buscar professor por ID")
+    public ResponseEntity<ProfessorResponseDTO> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(professorService.buscarPorId(id));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar um professor existente")
-    public ResponseEntity<ProfessorResponseDTO> atualizar(@PathVariable Long id,
+    public ResponseEntity<ProfessorResponseDTO> atualizar(
+            @PathVariable Long id,
             @Valid @RequestBody ProfessorRequestDTO dto) {
-        ProfessorResponseDTO response = professorService.atualizar(id, dto);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(professorService.atualizar(id, dto));
     }
 
     @PutMapping("/{id}/nome")
-    public ResponseEntity<Map<String, String>> atualizarNome(@PathVariable Long id,
-            @RequestBody Map<String, String> payload) {
-        String nome = payload.get("nome");
-        Professor professor = professorService.atualizarNome(id, nome);
-        return ResponseEntity.ok(Map.of("nome", professor.getNome()));
+    @Operation(summary = "Atualizar apenas o nome do professor")
+    public ResponseEntity<ProfessorResponseDTO> atualizarNome(
+            @PathVariable Long id,
+            @RequestBody ProfessorRequestDTO dto) {
+        return ResponseEntity.ok(professorService.atualizarNome(id, dto.getNome()));
     }
 
     @PutMapping("/{id}/foto")
     @Operation(summary = "Atualizar a foto de perfil do professor")
-    public ResponseEntity<Map<String, String>> atualizarFoto(@PathVariable Long id,
-            @RequestBody Map<String, String> payload) {
-        String fotoUrl = payload.get("fotoUrl");
-        Professor professor = professorService.atualizarFoto(id, fotoUrl);
-        return ResponseEntity.ok(Map.of("foto", professor.getFoto() != null ? professor.getFoto() : ""));
+    public ResponseEntity<ProfessorResponseDTO> atualizarFoto(
+            @PathVariable Long id,
+            @RequestBody ProfessorRequestDTO dto) {
+        return ResponseEntity.ok(professorService.atualizarFoto(id, dto.getFoto()));
     }
 
     @DeleteMapping("/{id}")
