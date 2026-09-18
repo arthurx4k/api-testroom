@@ -12,6 +12,7 @@ public class ProfessorResponseDTO {
 
     private Long id;
     private String nome;
+    private String email;
     private String especialidade;
     private String descricao;
     private String foto;
@@ -27,6 +28,7 @@ public class ProfessorResponseDTO {
     if (professor.getUsuario() != null) {
         this.usuarioId = professor.getUsuario().getId();
         this.usuarioEmail = professor.getUsuario().getEmail();
+        this.email = professor.getUsuario().getEmail();
     }
 }
 }
