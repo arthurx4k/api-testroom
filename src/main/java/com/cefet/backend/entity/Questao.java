@@ -32,6 +32,9 @@ public class Questao {
     @Column(name = "tipo_questao", nullable = false)
     private TipoQuestao tipoQuestao;
 
+    @Column(name = "foto", length = 500, nullable = true)
+    private String foto;
+
     @Column(nullable = false, length = 2000)
     private String enunciado;
 
@@ -42,10 +45,6 @@ public class Questao {
     private List<Alternativa> alternativas = new ArrayList<>();
 
     @ManyToMany
-    @JoinTable(
-        name = "categoria_questao",
-        joinColumns = @JoinColumn(name = "questao_id"),
-        inverseJoinColumns = @JoinColumn(name = "categoria_id")
-    )
+    @JoinTable(name = "categoria_questao", joinColumns = @JoinColumn(name = "questao_id"), inverseJoinColumns = @JoinColumn(name = "categoria_id"))
     private Set<Categoria> categorias = new HashSet<>();
 }

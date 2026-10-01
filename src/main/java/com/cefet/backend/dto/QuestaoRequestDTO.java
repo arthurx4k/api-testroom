@@ -18,6 +18,8 @@ import java.util.List;
 @NoArgsConstructor
 public class QuestaoRequestDTO {
 
+    private String foto;
+
     @NotNull(message = "Tipo de questão é obrigatório")
     private TipoQuestao tipoQuestao;
 

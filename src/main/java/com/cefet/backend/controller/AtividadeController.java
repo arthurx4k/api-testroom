@@ -4,12 +4,14 @@ import com.cefet.backend.dto.AtividadeComQuestoesRequestDTO;
 import com.cefet.backend.dto.AtividadeRequestDTO;
 import com.cefet.backend.dto.AtividadeResponseDTO;
 import com.cefet.backend.dto.AtividadeResumoDTO;
+import com.cefet.backend.dto.PdfOptionsDTO;
 import com.cefet.backend.entity.Atividade;
 import com.cefet.backend.service.AtividadeService;
 import com.cefet.backend.service.PdfService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import com.cefet.backend.dto.PdfOptionsDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -35,9 +37,11 @@ public class AtividadeController {
 
     @GetMapping("/{id}/pdf")
     @Operation(summary = "Exportar atividade para PDF")
-    public ResponseEntity<byte[]> exportarPdf(@PathVariable Long id) throws IOException {
+    public ResponseEntity<byte[]> exportarPdf(
+            @PathVariable Long id,
+            @ModelAttribute PdfOptionsDTO options) throws IOException {
         Atividade atividade = atividadeService.buscarPorId(id);
-        byte[] pdf = pdfService.gerarPdfAtividade(atividade);
+        byte[] pdf = pdfService.gerarPdfAtividade(atividade, options);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.setContentDispositionFormData("attachment", "atividade_" + id + ".pdf");
@@ -63,9 +67,11 @@ public class AtividadeController {
 
     @GetMapping("/{id}/gabarito")
     @Operation(summary = "Exportar gabarito da atividade para PDF")
-    public ResponseEntity<byte[]> exportarGabarito(@PathVariable Long id) throws IOException {
+    public ResponseEntity<byte[]> exportarGabarito(
+            @PathVariable Long id,
+            @ModelAttribute PdfOptionsDTO options) throws IOException {
         Atividade atividade = atividadeService.buscarPorId(id);
-        byte[] pdf = pdfService.gerarGabarito(atividade);
+        byte[] pdf = pdfService.gerarGabarito(atividade, options);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.setContentDispositionFormData("attachment", "gabarito_" + id + ".pdf");

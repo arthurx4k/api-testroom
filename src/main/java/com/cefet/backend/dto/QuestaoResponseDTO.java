@@ -18,6 +18,7 @@ public class QuestaoResponseDTO {
 
     private Long id;
     private TipoQuestao tipoQuestao;
+    private String foto;
     private String enunciado;
     private String criadoPor;
     private Long professorId;
@@ -28,6 +29,7 @@ public class QuestaoResponseDTO {
     public QuestaoResponseDTO(Questao questao) {
         this.id = questao.getId();
         this.tipoQuestao = questao.getTipoQuestao();
+        this.foto = questao.getFoto();
         this.enunciado = questao.getEnunciado();
         this.criadoPor = questao.getCriadoPor();
         if (questao.getProfessor() != null) {

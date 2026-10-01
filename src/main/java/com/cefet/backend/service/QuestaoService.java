@@ -52,6 +52,7 @@ public class QuestaoService {
         Questao questao = new Questao();
         questao.setProfessor(professor);
         questao.setTipoQuestao(dto.getTipoQuestao());
+        questao.setFoto(dto.getFoto());
         questao.setEnunciado(dto.getEnunciado());
         questao.setCriadoPor(professor.getNome());
 
@@ -117,6 +118,7 @@ public class QuestaoService {
         }
         questao.setCategorias(new java.util.HashSet<>(categorias));
 
+        questao.setFoto(dto.getFoto());
         questao.setEnunciado(dto.getEnunciado());
 
         if (dto.getTipoQuestao() != questao.getTipoQuestao()) {
