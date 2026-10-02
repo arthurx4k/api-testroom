@@ -1,6 +1,7 @@
 package com.cefet.backend.controller;
 
 import com.cefet.backend.dto.AtividadeComQuestoesRequestDTO;
+import com.cefet.backend.dto.AtividadeLayoutDTO;
 import com.cefet.backend.dto.AtividadeRequestDTO;
 import com.cefet.backend.dto.AtividadeResponseDTO;
 import com.cefet.backend.dto.AtividadeResumoDTO;
@@ -82,6 +83,15 @@ public class AtividadeController {
     @Operation(summary = "Listar atividades de um professor")
     public ResponseEntity<List<AtividadeResumoDTO>> listar(@RequestParam Long professorId) {
         return ResponseEntity.ok(atividadeService.listarPorProfessor(professorId));
+    }
+
+    @PutMapping("/{id}/layout")
+    @Operation(summary = "Salvar layout do PDF (ordem, quebras, opções visuais)")
+    public ResponseEntity<Void> salvarLayout(
+            @PathVariable Long id,
+            @RequestBody AtividadeLayoutDTO dto) {
+        atividadeService.salvarLayout(id, dto);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")

@@ -55,6 +55,7 @@ public class AtividadeResponseDTO {
         private String enunciado;
         private Integer posicao;
         private BigDecimal valorPontos;
+        private Boolean quebraPaginaAntes;
         private List<AlternativaDTO> alternativas;
 
         public QuestaoAtividadeDTO(QuestaoAtividade qa) {
@@ -62,6 +63,7 @@ public class AtividadeResponseDTO {
             this.foto = qa.getQuestao().getFoto();
             this.enunciado = qa.getQuestao().getEnunciado();
             this.posicao = qa.getPosicao();
+            this.quebraPaginaAntes = qa.getQuebraPaginaAntes();
             this.valorPontos = qa.getValorPontos();
 
             if (qa.getQuestao().getAlternativas() != null) {
@@ -91,10 +93,12 @@ public class AtividadeResponseDTO {
     public static class AlternativaDTO {
         private Long id;
         private String texto;
+        private Boolean verdadeira;
 
         public AlternativaDTO(Alternativa alt) {
             this.id = alt.getId();
             this.texto = alt.getTexto();
+            this.verdadeira = alt.getVerdadeira();
         }
     }
 }

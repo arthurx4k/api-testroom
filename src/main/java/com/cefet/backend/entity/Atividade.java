@@ -48,6 +48,9 @@ public class Atividade {
     @Column(name = "grupo_id", length = 36)
     private String grupoId;
 
+    @Column(name = "pdf_options_json", columnDefinition = "TEXT")
+    private String pdfOptionsJson;
+
     @OneToMany(mappedBy = "atividade", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<QuestaoAtividade> questoes = new ArrayList<>();
 }
