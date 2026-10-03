@@ -28,6 +28,8 @@ import java.util.stream.Collectors;
 @Service
 public class PdfService {
 
+    private static final float LEADING = 1.15f;
+
     public byte[] gerarPdfAtividade(Atividade atividade, PdfOptionsDTO options) throws IOException {
         return gerarPdf(atividade, options, false);
     }
@@ -47,48 +49,54 @@ public class PdfService {
         float margem = nvl(opt.getMargemPagina(), 36f);
         document.setMargins(margem, margem, margem, margem);
 
-        float fTitulo     = nvl(opt.getTamanhoFonteTitulo(), 18f);
-        float fEnunciado  = nvl(opt.getTamanhoFonteEnunciado(), 12f);
+        float fTitulo      = nvl(opt.getTamanhoFonteTitulo(), 18f);
+        float fEnunciado   = nvl(opt.getTamanhoFonteEnunciado(), 12f);
         float fAlternativa = nvl(opt.getTamanhoFonteAlternativa(), 11f);
-        float fInfo       = nvl(opt.getTamanhoFonteInfo(), 12f);
-        float espacamento = nvl(opt.getEspacamentoEntreQuestoes(), 10f);
+        float fInfo        = nvl(opt.getTamanhoFonteInfo(), 12f);
+        float espacamento  = nvl(opt.getEspacamentoEntreQuestoes(), 10f);
 
         boolean manterJuntas = isTrue(opt.getManterQuestoesJuntas());
         boolean mostrarFotos = isTrue(opt.getMostrarFotos());
 
-      
         String titulo = comGabarito ? "GABARITO — " + atividade.getTitulo() : atividade.getTitulo();
         document.add(new Paragraph(titulo)
                 .setFontSize(fTitulo)
                 .setBold()
-                .setTextAlignment(TextAlignment.CENTER));
+                .setTextAlignment(TextAlignment.CENTER)
+                .setMultipliedLeading(LEADING));
 
         if (isTrue(opt.getMostrarDescricao())
                 && atividade.getDescricao() != null && !atividade.getDescricao().isBlank()) {
-            document.add(new Paragraph(atividade.getDescricao()).setFontSize(fInfo));
+            document.add(new Paragraph(atividade.getDescricao())
+                    .setFontSize(fInfo)
+                    .setMultipliedLeading(LEADING));
         }
 
         if (isTrue(opt.getMostrarData())) {
             String data = atividade.getDataGeracao() != null
                     ? atividade.getDataGeracao().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
                     : "Data não definida";
-            document.add(new Paragraph("Gerada em: " + data).setFontSize(fInfo));
+            document.add(new Paragraph("Gerada em: " + data)
+                    .setFontSize(fInfo)
+                    .setMultipliedLeading(LEADING));
         }
 
         if (isTrue(opt.getMostrarInstrucoes())
                 && atividade.getInstrucoes() != null && !atividade.getInstrucoes().isBlank()) {
-            document.add(new Paragraph("Instruções: " + atividade.getInstrucoes()).setFontSize(fInfo));
+            document.add(new Paragraph("Instruções: " + atividade.getInstrucoes())
+                    .setFontSize(fInfo)
+                    .setMultipliedLeading(LEADING));
         }
 
         if (isTrue(opt.getMostrarTotalPontos())) {
             BigDecimal total = atividade.getValorPontos() != null ? atividade.getValorPontos() : BigDecimal.ZERO;
             document.add(new Paragraph("Total de pontos: " + total.stripTrailingZeros().toPlainString())
-                    .setFontSize(fInfo));
+                    .setFontSize(fInfo)
+                    .setMultipliedLeading(LEADING));
         }
 
-        document.add(new Paragraph("\n"));
+        document.add(new Paragraph("\n").setMultipliedLeading(LEADING));
 
-        
         List<QuestaoAtividade> questoes = atividade.getQuestoes().stream()
                 .sorted(Comparator.comparing(QuestaoAtividade::getPosicao))
                 .collect(Collectors.toList());
@@ -99,7 +107,6 @@ public class PdfService {
             bloco.setMarginBottom(espacamento);
 
             bloco.setKeepTogether(manterJuntas);
-
             Div cab = new Div();
             cab.setKeepTogether(true);
 
@@ -110,7 +117,9 @@ public class PdfService {
                       .append(qa.getValorPontos().stripTrailingZeros().toPlainString())
                       .append(" pts)");
             }
-            cab.add(new Paragraph(cabTxt.toString()).setFontSize(fEnunciado));
+            cab.add(new Paragraph(cabTxt.toString())
+                    .setFontSize(fEnunciado)
+                    .setMultipliedLeading(LEADING));
 
             String fotoUrl = qa.getQuestao().getFoto();
             if (mostrarFotos && fotoUrl != null && !fotoUrl.isBlank()) {
@@ -121,7 +130,7 @@ public class PdfService {
                     img.setMarginTop(4).setMarginBottom(6);
                     cab.add(img);
                 } catch (Exception ex) {
-                    
+
                 }
             }
             bloco.add(cab);
@@ -140,7 +149,9 @@ public class PdfService {
                     texto += "   <<< RESPOSTA CORRETA";
                 }
 
-                Paragraph p = new Paragraph(texto).setFontSize(fAlternativa);
+                Paragraph p = new Paragraph(texto)
+                        .setFontSize(fAlternativa)
+                        .setMultipliedLeading(LEADING);
 
                 p.setKeepTogether(manterJuntas);
 
