@@ -37,7 +37,8 @@ public class PdfService {
     }
 
     private byte[] gerarPdf(Atividade atividade, PdfOptionsDTO opt, boolean comGabarito) throws IOException {
-        if (opt == null) opt = new PdfOptionsDTO();
+        if (opt == null)
+            opt = new PdfOptionsDTO();
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PdfWriter writer = new PdfWriter(baos);
@@ -47,7 +48,6 @@ public class PdfService {
         float margem = nvl(opt.getMargemPagina(), 36f);
         document.setMargins(margem, margem, margem, margem);
 
-        // ===== Cabeçalho =====
         String titulo = comGabarito ? "GABARITO — " + atividade.getTitulo() : atividade.getTitulo();
         document.add(new Paragraph(titulo)
                 .setFontSize(nvl(opt.getTamanhoFonteTitulo(), 18f))
@@ -80,7 +80,7 @@ public class PdfService {
         document.add(new Paragraph("\n"));
 
         float espacamento = nvl(opt.getEspacamentoEntreQuestoes(), 10f);
-        float fEnunciado   = nvl(opt.getTamanhoFonteEnunciado(), 12f);
+        float fEnunciado = nvl(opt.getTamanhoFonteEnunciado(), 12f);
         float fAlternativa = nvl(opt.getTamanhoFonteAlternativa(), 11f);
         boolean manterJuntas = isTrue(opt.getManterQuestoesJuntas());
         boolean mostrarFotos = isTrue(opt.getMostrarFotos());
@@ -100,8 +100,8 @@ public class PdfService {
             cab.append(qa.getPosicao()).append(". ").append(qa.getQuestao().getEnunciado());
             if (isTrue(opt.getMostrarPontosPorQuestao()) && qa.getValorPontos() != null) {
                 cab.append(" (")
-                   .append(qa.getValorPontos().stripTrailingZeros().toPlainString())
-                   .append(" pts)");
+                        .append(qa.getValorPontos().stripTrailingZeros().toPlainString())
+                        .append(" pts)");
             }
             bloco.add(new Paragraph(cab.toString()).setFontSize(fEnunciado));
 
@@ -118,11 +118,17 @@ public class PdfService {
             }
 
             List<Alternativa> alternativas = obterAlternativasOrdenadas(qa);
+            String tipo = qa.getQuestao().getTipoQuestao().name();
+
             char letra = 'A';
             for (Alternativa alt : alternativas) {
-                String texto = "   " + letra + ") " + alt.getTexto();
+                String prefixo = "UNICA_ESCOLHA".equals(tipo)
+                        ? "   " + letra + ") "
+                        : "   (     ) ";
+
+                String texto = prefixo + alt.getTexto();
                 if (comGabarito && Boolean.TRUE.equals(alt.getVerdadeira())) {
-                    texto += "    <<< RESPOSTA CORRETA";
+                    texto += "   <<< RESPOSTA CORRETA";
                 }
                 bloco.add(new Paragraph(texto).setFontSize(fAlternativa));
                 letra++;
@@ -152,6 +158,11 @@ public class PdfService {
         return alternativas;
     }
 
-    private static boolean isTrue(Boolean b)   { return b == null || b; }
-    private static float nvl(Float f, float d) { return f == null ? d : f; }
+    private static boolean isTrue(Boolean b) {
+        return b == null || b;
+    }
+
+    private static float nvl(Float f, float d) {
+        return f == null ? d : f;
+    }
 }

@@ -51,6 +51,7 @@ public class AtividadeResponseDTO {
     @NoArgsConstructor
     public static class QuestaoAtividadeDTO {
         private Long questaoId;
+        private String tipoQuestao;
         private String foto;
         private String enunciado;
         private Integer posicao;
@@ -60,6 +61,7 @@ public class AtividadeResponseDTO {
 
         public QuestaoAtividadeDTO(QuestaoAtividade qa) {
             this.questaoId = qa.getQuestao().getId();
+            this.tipoQuestao = qa.getQuestao().getTipoQuestao().name();
             this.foto = qa.getQuestao().getFoto();
             this.enunciado = qa.getQuestao().getEnunciado();
             this.posicao = qa.getPosicao();
