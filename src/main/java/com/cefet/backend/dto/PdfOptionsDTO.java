@@ -20,6 +20,7 @@ public class PdfOptionsDTO {
     private Float tamanhoFonteTitulo = 18f;
     private Float tamanhoFonteEnunciado = 12f;
     private Float tamanhoFonteAlternativa = 11f;
+    private Float tamanhoFonteInfo = 12f;
     private Float espacamentoEntreQuestoes = 10f;
     private Float margemPagina = 36f;
 }
