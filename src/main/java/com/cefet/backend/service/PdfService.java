@@ -107,6 +107,7 @@ public class PdfService {
             bloco.setMarginBottom(espacamento);
 
             bloco.setKeepTogether(manterJuntas);
+
             Div cab = new Div();
             cab.setKeepTogether(true);
 
@@ -130,7 +131,7 @@ public class PdfService {
                     img.setMarginTop(4).setMarginBottom(6);
                     cab.add(img);
                 } catch (Exception ex) {
-
+                
                 }
             }
             bloco.add(cab);

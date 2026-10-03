@@ -215,6 +215,10 @@ public class AtividadeService {
                     if (!qa.getAtividade().getId().equals(atividadeId))
                         return;
                     qa.setPosicao(item.getPosicao());
+                    if (item.getEnunciadoHtml() != null) {
+                        qa.getQuestao().setEnunciado(item.getEnunciadoHtml());
+                        questaoRepository.save(qa.getQuestao());
+                    }
                     if (item.getQuebraPaginaAntes() != null) {
                         qa.setQuebraPaginaAntes(item.getQuebraPaginaAntes());
                     }
