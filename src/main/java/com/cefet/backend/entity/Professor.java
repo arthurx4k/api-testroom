@@ -37,6 +37,6 @@ public class Professor {
     @ManyToMany(mappedBy = "compartilhadaCom")
     private Set<Categoria> categoriasCompartilhadas = new HashSet<>();
 
-    @Column(name = "foto", length = 500, nullable = true)
+    @Column(name = "foto", columnDefinition = "TEXT")
     private String foto;
 }

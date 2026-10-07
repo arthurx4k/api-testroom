@@ -87,7 +87,6 @@ public class CategoriaService {
     public void excluir(Long id, Long professorId) {
         Professor professor = professorRepository.findById(professorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Professor não encontrado. Id: " + professorId));
-
         Categoria categoria = categoriaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada. Id: " + id));
 
@@ -95,6 +94,11 @@ public class CategoriaService {
             throw new BusinessException("Apenas o criador pode excluir a categoria.");
         }
 
+        if (!categoria.getQuestoes().isEmpty()) {
+            throw new BusinessException("A categoria ainda tem questões vinculadas.");
+        }
+
+        compartilhamentoRepo.deleteByCategoria(categoria);
         categoriaRepository.deleteById(id);
     }
 
@@ -118,6 +122,8 @@ public class CategoriaService {
         }
 
         categoria.getCompartilhadaCom().remove(alvo);
+        compartilhamentoRepo.findByCategoriaAndDestino(categoria, alvo)
+                .ifPresent(compartilhamentoRepo::delete);
         categoriaRepository.save(categoria);
     }
 
@@ -147,7 +153,11 @@ public class CategoriaService {
                 throw new BusinessException("Categoria já aceita por este professor.");
         });
 
-        CompartilhamentoCategoria c = new CompartilhamentoCategoria();
+        CompartilhamentoCategoria c = compartilhamentoRepo.findByCategoriaAndDestino(cat, destino)
+                .orElseGet(CompartilhamentoCategoria::new);
+        if (c.getStatus() == StatusCompartilhamento.PENDENTE) {
+            throw new BusinessException("Já existe um convite pendente para este professor.");
+        }
         c.setCategoria(cat);
         c.setOrigem(origem);
         c.setDestino(destino);

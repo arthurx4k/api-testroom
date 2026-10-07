@@ -25,6 +25,6 @@ public class Alternativa {
     @Column(nullable = false, length = 255)
     private String texto;
 
-    @Column(nullable = false, columnDefinition = "TINYINT(1)")
+    @Column(nullable = false)
     private Boolean verdadeira;
 }

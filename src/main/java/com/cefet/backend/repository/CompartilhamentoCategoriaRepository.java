@@ -6,11 +6,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CompartilhamentoCategoriaRepository
-        extends JpaRepository<CompartilhamentoCategoria, Long> {
+                extends JpaRepository<CompartilhamentoCategoria, Long> {
 
-    List<CompartilhamentoCategoria> findByDestinoAndStatus(
-            Professor destino, StatusCompartilhamento status);
+        List<CompartilhamentoCategoria> findByDestinoAndStatus(
+                        Professor destino, StatusCompartilhamento status);
 
-    Optional<CompartilhamentoCategoria> findByCategoriaAndDestino(
-            Categoria categoria, Professor destino);
+        Optional<CompartilhamentoCategoria> findByCategoriaAndDestino(
+                        Categoria categoria, Professor destino);
+
+        void deleteByCategoria(Categoria categoria);
 }

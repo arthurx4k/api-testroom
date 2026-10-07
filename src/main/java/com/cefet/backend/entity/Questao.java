@@ -32,7 +32,7 @@ public class Questao {
     @Column(name = "tipo_questao", nullable = false)
     private TipoQuestao tipoQuestao;
 
-    @Column(name = "foto", length = 500, nullable = true)
+    @Column(name = "foto", columnDefinition = "TEXT")
     private String foto;
 
     @Column(nullable = false, length = 2000)

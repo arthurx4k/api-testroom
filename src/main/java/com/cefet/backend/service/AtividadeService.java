@@ -83,7 +83,7 @@ public class AtividadeService {
 
     private List<Questao> buscarQuestoesPorFiltros(AtividadeRequestDTO dto) {
         if (dto.getCategoriaIds() != null && !dto.getCategoriaIds().isEmpty()) {
-            return questaoRepository.findByCategoriasIdIn(dto.getCategoriaIds());
+            return questaoRepository.findDistinctByCategoriasIdIn(dto.getCategoriaIds());
         }
         return questaoRepository.findAll();
     }

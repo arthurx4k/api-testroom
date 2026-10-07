@@ -26,13 +26,13 @@ public class Atividade {
     @Column(nullable = false, length = 255)
     private String titulo;
 
-    @Column(length = 500)
+    @Column(length = 2000)
     private String descricao;
 
     @Column(length = 2000)
     private String instrucoes;
 
-    @Column(name = "valor_pontos", nullable = false, precision = 3, scale = 2)
+    @Column(name = "valor_pontos", nullable = false, precision = 7, scale = 2)
     private BigDecimal valorPontos;
 
     @ManyToOne

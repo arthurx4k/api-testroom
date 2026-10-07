@@ -21,6 +21,9 @@ public class QuestaoService {
     private QuestaoRepository questaoRepository;
 
     @Autowired
+    private QuestaoAtividadeRepository questaoAtividadeRepository;
+
+    @Autowired
     private ProfessorRepository professorRepository;
 
     @Autowired
@@ -179,7 +182,7 @@ public class QuestaoService {
             }
         }
 
-        return questaoRepository.findByCategoriasIdIn(categoriaIds).stream()
+        return questaoRepository.findDistinctByCategoriasIdIn(categoriaIds).stream()
                 .filter(q -> q.getProfessor().equals(professor)
                         || q.getCategorias().stream().anyMatch(c -> c.getCompartilhadaCom().contains(professor)))
                 .map(QuestaoResponseDTO::new)
@@ -190,12 +193,14 @@ public class QuestaoService {
     public void excluir(Long id, Long professorId) {
         Professor professor = professorRepository.findById(professorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Professor não encontrado. Id: " + professorId));
-
         Questao questao = questaoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Questão não encontrada. Id: " + id));
 
         if (!questao.getProfessor().equals(professor)) {
             throw new BusinessException("Apenas o criador pode excluir esta questão.");
+        }
+        if (questaoAtividadeRepository.existsByQuestao(questao)) {
+            throw new BusinessException("Esta questão já está sendo usada em uma ou mais atividades.");
         }
 
         alternativaRepository.deleteByQuestao(questao);

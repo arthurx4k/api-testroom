@@ -84,4 +84,17 @@ public class ResourceExceptionHandler {
 
           return ResponseEntity.status(status).body(err);
      }
+
+     @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+     public ResponseEntity<StandardError> integridade(
+               org.springframework.dao.DataIntegrityViolationException e,
+               HttpServletRequest request) {
+          StandardError err = new StandardError(
+                    java.time.Instant.now(),
+                    409,
+                    "Conflito de dados",
+                    "Registro em uso ou já existente.",
+                    request.getRequestURI());
+          return ResponseEntity.status(409).body(err);
+     }
 }

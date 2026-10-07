@@ -28,6 +28,9 @@ public class AtividadeResponseDTO {
     private String professorNome;
     private LocalDateTime dataGeracao;
     private List<QuestaoAtividadeDTO> questoes;
+    private String grupoId;
+    private Integer quantidadeVersoes;
+    private String pdfOptionsJson;
 
     public AtividadeResponseDTO(Atividade atividade) {
         this.id = atividade.getId();
@@ -38,6 +41,9 @@ public class AtividadeResponseDTO {
         this.professorId = atividade.getProfessor().getId();
         this.professorNome = atividade.getProfessor().getNome();
         this.dataGeracao = atividade.getDataGeracao();
+        this.grupoId = atividade.getGrupoId();
+        this.quantidadeVersoes = atividade.getQuantidadeVersoes();
+        this.pdfOptionsJson = atividade.getPdfOptionsJson();
         if (atividade.getQuestoes() != null) {
             this.questoes = atividade.getQuestoes().stream()
                     .sorted(Comparator.comparing(QuestaoAtividade::getPosicao))
