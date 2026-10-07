@@ -9,6 +9,7 @@ import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.AreaBreak;
 import com.itextpdf.layout.element.Div;
 import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
@@ -21,14 +22,13 @@ import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class PdfService {
-
-    private static final float LEADING = 1.15f;
 
     public byte[] gerarPdfAtividade(Atividade atividade, PdfOptionsDTO options) throws IOException {
         return gerarPdf(atividade, options, false);
@@ -49,114 +49,90 @@ public class PdfService {
         float margem = nvl(opt.getMargemPagina(), 36f);
         document.setMargins(margem, margem, margem, margem);
 
-        float fTitulo      = nvl(opt.getTamanhoFonteTitulo(), 18f);
-        float fEnunciado   = nvl(opt.getTamanhoFonteEnunciado(), 12f);
-        float fAlternativa = nvl(opt.getTamanhoFonteAlternativa(), 11f);
-        float fInfo        = nvl(opt.getTamanhoFonteInfo(), 12f);
-        float espacamento  = nvl(opt.getEspacamentoEntreQuestoes(), 10f);
-
-        boolean manterJuntas = isTrue(opt.getManterQuestoesJuntas());
-        boolean mostrarFotos = isTrue(opt.getMostrarFotos());
-
+        // ===== Cabeçalho =====
         String titulo = comGabarito ? "GABARITO — " + atividade.getTitulo() : atividade.getTitulo();
         document.add(new Paragraph(titulo)
-                .setFontSize(fTitulo)
+                .setFontSize(nvl(opt.getTamanhoFonteTitulo(), 18f))
                 .setBold()
-                .setTextAlignment(TextAlignment.CENTER)
-                .setMultipliedLeading(LEADING));
+                .setTextAlignment(TextAlignment.CENTER));
 
         if (isTrue(opt.getMostrarDescricao())
                 && atividade.getDescricao() != null && !atividade.getDescricao().isBlank()) {
-            document.add(new Paragraph(atividade.getDescricao())
-                    .setFontSize(fInfo)
-                    .setMultipliedLeading(LEADING));
+            document.add(new Paragraph(atividade.getDescricao()));
         }
 
         if (isTrue(opt.getMostrarData())) {
             String data = atividade.getDataGeracao() != null
                     ? atividade.getDataGeracao().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
                     : "Data não definida";
-            document.add(new Paragraph("Gerada em: " + data)
-                    .setFontSize(fInfo)
-                    .setMultipliedLeading(LEADING));
+            document.add(new Paragraph("Gerada em: " + data).setFontSize(10));
         }
 
         if (isTrue(opt.getMostrarInstrucoes())
                 && atividade.getInstrucoes() != null && !atividade.getInstrucoes().isBlank()) {
-            document.add(new Paragraph("Instruções: " + atividade.getInstrucoes())
-                    .setFontSize(fInfo)
-                    .setMultipliedLeading(LEADING));
+            document.add(new Paragraph("Instruções: " + atividade.getInstrucoes()));
         }
 
         if (isTrue(opt.getMostrarTotalPontos())) {
             BigDecimal total = atividade.getValorPontos() != null ? atividade.getValorPontos() : BigDecimal.ZERO;
             document.add(new Paragraph("Total de pontos: " + total.stripTrailingZeros().toPlainString())
-                    .setFontSize(fInfo)
-                    .setMultipliedLeading(LEADING));
+                    .setFontSize(10));
         }
 
-        document.add(new Paragraph("\n").setMultipliedLeading(LEADING));
+        document.add(new Paragraph("\n"));
+
+        float espacamento   = nvl(opt.getEspacamentoEntreQuestoes(), 10f);
+        float fEnunciado    = nvl(opt.getTamanhoFonteEnunciado(), 12f);
+        float fAlternativa  = nvl(opt.getTamanhoFonteAlternativa(), 11f);
+        boolean manterJuntas = isTrue(opt.getManterQuestoesJuntas());
+        boolean mostrarFotos = isTrue(opt.getMostrarFotos());
 
         List<QuestaoAtividade> questoes = atividade.getQuestoes().stream()
                 .sorted(Comparator.comparing(QuestaoAtividade::getPosicao))
                 .collect(Collectors.toList());
 
+        boolean primeira = true;
         for (QuestaoAtividade qa : questoes) {
 
+            if (Boolean.TRUE.equals(qa.getQuebraPaginaAntes()) && !primeira) {
+                document.add(new AreaBreak());
+            }
+            primeira = false;
+
             Div bloco = new Div();
+            if (manterJuntas) {
+                bloco.setKeepTogether(true);
+            }
             bloco.setMarginBottom(espacamento);
 
-            bloco.setKeepTogether(manterJuntas);
-
-            Div cab = new Div();
-            cab.setKeepTogether(true);
-
-            StringBuilder cabTxt = new StringBuilder();
-            cabTxt.append(qa.getPosicao()).append(". ").append(qa.getQuestao().getEnunciado());
+            StringBuilder cab = new StringBuilder();
+            cab.append(qa.getPosicao()).append(". ").append(qa.getQuestao().getEnunciado());
             if (isTrue(opt.getMostrarPontosPorQuestao()) && qa.getValorPontos() != null) {
-                cabTxt.append(" (")
-                      .append(qa.getValorPontos().stripTrailingZeros().toPlainString())
-                      .append(" pts)");
+                cab.append(" (")
+                   .append(qa.getValorPontos().stripTrailingZeros().toPlainString())
+                   .append(" pts)");
             }
-            cab.add(new Paragraph(cabTxt.toString())
-                    .setFontSize(fEnunciado)
-                    .setMultipliedLeading(LEADING));
+            bloco.add(new Paragraph(cab.toString()).setFontSize(fEnunciado));
 
             String fotoUrl = qa.getQuestao().getFoto();
             if (mostrarFotos && fotoUrl != null && !fotoUrl.isBlank()) {
-                try {
-                    ImageData imgData = ImageDataFactory.create(fotoUrl);
+                ImageData imgData = carregarImagem(fotoUrl);
+                if (imgData != null) {
                     Image img = new Image(imgData);
                     img.scaleToFit(300, 400);
                     img.setMarginTop(4).setMarginBottom(6);
-                    cab.add(img);
-                } catch (Exception ex) {
-                
+                    bloco.add(img);
                 }
             }
-            bloco.add(cab);
 
-            String tipo = qa.getQuestao().getTipoQuestao().name();
-            boolean unicaEscolha = "UNICA_ESCOLHA".equals(tipo);
-
+            List<Alternativa> alternativas = obterAlternativasOrdenadas(qa);
             char letra = 'A';
-            for (Alternativa alt : obterAlternativasOrdenadas(qa)) {
-                String prefixo = unicaEscolha
-                        ? "   " + letra + ") "
-                        : "   (     ) ";
-
-                String texto = prefixo + alt.getTexto();
+            for (Alternativa alt : alternativas) {
+                String texto = "   " + letra + ") " + alt.getTexto();
                 if (comGabarito && Boolean.TRUE.equals(alt.getVerdadeira())) {
-                    texto += "   <<< RESPOSTA CORRETA";
+                    texto += "    <<< RESPOSTA CORRETA";
                 }
-
-                Paragraph p = new Paragraph(texto)
-                        .setFontSize(fAlternativa)
-                        .setMultipliedLeading(LEADING);
-
-                p.setKeepTogether(manterJuntas);
-
-                bloco.add(p);
+                bloco.add(new Paragraph(texto).setFontSize(fAlternativa));
                 letra++;
             }
 
@@ -165,6 +141,21 @@ public class PdfService {
 
         document.close();
         return baos.toByteArray();
+    }
+
+    private ImageData carregarImagem(String url) {
+        try {
+            if (url.startsWith("data:image/")) {
+                int comma = url.indexOf(',');
+                if (comma < 0) return null;
+                String base64 = url.substring(comma + 1);
+                byte[] bytes = Base64.getDecoder().decode(base64);
+                return ImageDataFactory.create(bytes);
+            }
+            return ImageDataFactory.create(url);
+        } catch (Exception ex) {
+            return null;
+        }
     }
 
     private List<Alternativa> obterAlternativasOrdenadas(QuestaoAtividade qa) {

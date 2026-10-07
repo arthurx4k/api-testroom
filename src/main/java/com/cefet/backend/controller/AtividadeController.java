@@ -36,6 +36,9 @@ public class AtividadeController {
     @Autowired
     private PdfService pdfService;
 
+    @Autowired
+    private com.cefet.backend.service.HtmlPdfService htmlPdfService;
+
     @GetMapping("/{id}/pdf")
     @Operation(summary = "Exportar atividade para PDF")
     public ResponseEntity<byte[]> exportarPdf(
@@ -99,5 +102,32 @@ public class AtividadeController {
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
         atividadeService.excluir(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/html")
+    @Operation(summary = "Obter HTML (editor tipo Word) da atividade")
+    public ResponseEntity<com.cefet.backend.dto.AtividadeHtmlDTO> obterHtml(@PathVariable Long id) {
+        String html = atividadeService.buscarHtml(id);
+        return ResponseEntity.ok(new com.cefet.backend.dto.AtividadeHtmlDTO(html));
+    }
+
+    @PutMapping("/{id}/html")
+    @Operation(summary = "Salvar HTML (editor tipo Word) da atividade")
+    public ResponseEntity<Void> salvarHtml(
+            @PathVariable Long id,
+            @RequestBody com.cefet.backend.dto.AtividadeHtmlDTO dto) {
+        atividadeService.salvarHtml(id, dto.getHtml());
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}/pdf-html")
+    @Operation(summary = "Gerar PDF do HTML salvo (editor tipo Word)")
+    public ResponseEntity<byte[]> pdfHtml(@PathVariable Long id) throws IOException {
+        String html = atividadeService.buscarHtml(id);
+        byte[] pdf = htmlPdfService.renderizar(html);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("inline", "atividade_" + id + ".pdf");
+        return ResponseEntity.ok().headers(headers).body(pdf);
     }
 }

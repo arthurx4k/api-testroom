@@ -215,10 +215,6 @@ public class AtividadeService {
                     if (!qa.getAtividade().getId().equals(atividadeId))
                         return;
                     qa.setPosicao(item.getPosicao());
-                    if (item.getEnunciadoHtml() != null) {
-                        qa.getQuestao().setEnunciado(item.getEnunciadoHtml());
-                        questaoRepository.save(qa.getQuestao());
-                    }
                     if (item.getQuebraPaginaAntes() != null) {
                         qa.setQuebraPaginaAntes(item.getQuebraPaginaAntes());
                     }
@@ -230,5 +226,20 @@ public class AtividadeService {
             a.setPdfOptionsJson(dto.getPdfOptionsJson());
             atividadeRepository.save(a);
         }
+    }
+
+        @Transactional(readOnly = true)
+    public String buscarHtml(Long id) {
+        Atividade a = atividadeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Atividade não encontrada. Id: " + id));
+        return a.getConteudoHtml();
+    }
+
+    @Transactional
+    public void salvarHtml(Long id, String html) {
+        Atividade a = atividadeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Atividade não encontrada. Id: " + id));
+        a.setConteudoHtml(html);
+        atividadeRepository.save(a);
     }
 }

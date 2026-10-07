@@ -18,5 +18,14 @@ public class AtividadeLayoutDTO {
         private Integer posicao;
         private Boolean quebraPaginaAntes;
         private String enunciadoHtml;
+        private List<AlternativaEditadaDTO> alternativas;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class AlternativaEditadaDTO {
+        private Long id;
+        private String texto;
     }
 }

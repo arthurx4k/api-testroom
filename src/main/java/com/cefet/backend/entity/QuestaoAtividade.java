@@ -39,4 +39,10 @@ public class QuestaoAtividade {
 
     @Column(name = "quebra_pagina_antes")
     private Boolean quebraPaginaAntes = false;
+
+    @Column(name = "enunciado_html", columnDefinition = "TEXT")
+    private String enunciadoHtml;
+
+    @Column(name = "alternativas_editadas_json", columnDefinition = "TEXT")
+    private String alternativasEditadasJson;
 }
