@@ -1,9 +1,7 @@
 package com.cefet.backend.dto;
 
-import com.cefet.backend.entity.CargoUsuario;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,7 +17,4 @@ public class UsuarioRequestDTO {
 
     @NotBlank(message = "Senha é obrigatória")
     private String senha;
-
-    @NotNull(message = "Cargo é obrigatório")
-    private CargoUsuario cargo; 
 }

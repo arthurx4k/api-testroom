@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -39,4 +40,17 @@ public class Professor {
 
     @Column(name = "foto", columnDefinition = "TEXT")
     private String foto;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Professor)) return false;
+        Professor other = (Professor) o;
+        return id != null && id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? Objects.hash(id) : System.identityHashCode(this);
+    }
 }

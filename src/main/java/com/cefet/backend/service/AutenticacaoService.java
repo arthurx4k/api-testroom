@@ -2,7 +2,6 @@ package com.cefet.backend.service;
 
 import com.cefet.backend.dto.AutenticacaoRequestDTO;
 import com.cefet.backend.dto.AutenticacaoResponseDTO;
-import com.cefet.backend.entity.CargoUsuario;
 import com.cefet.backend.entity.Professor;
 import com.cefet.backend.entity.Usuario;
 import com.cefet.backend.exception.BusinessException;
@@ -31,14 +30,13 @@ public class AutenticacaoService {
             throw new BusinessException("Login e/ou senha inválidos.");
         }
 
+        Professor professor = professorRepository.findByUsuario(usuario)
+                .orElseThrow(() -> new BusinessException("Professor não encontrado para este usuário."));
+
         AutenticacaoResponseDTO response = new AutenticacaoResponseDTO(usuario);
-        if (usuario.getCargo() == CargoUsuario.PROFESSOR) {
-            Professor professor = professorRepository.findByUsuario(usuario)
-                    .orElseThrow(() -> new BusinessException("Professor não encontrado para este usuário."));
-            response.setProfessorId(professor.getId());
-            response.setProfessorNome(professor.getNome());
-            response.setFoto(professor.getFoto());
-        }
+        response.setProfessorId(professor.getId());
+        response.setProfessorNome(professor.getNome());
+        response.setFoto(professor.getFoto());
         return response;
     }
 }

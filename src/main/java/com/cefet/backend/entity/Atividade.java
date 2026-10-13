@@ -48,9 +48,6 @@ public class Atividade {
     @Column(name = "grupo_id", length = 36)
     private String grupoId;
 
-    @Column(name = "pdf_options_json", columnDefinition = "TEXT")
-    private String pdfOptionsJson;
-
     @Column(name = "conteudo_html", columnDefinition = "TEXT")
     private String conteudoHtml;
 

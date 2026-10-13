@@ -33,16 +33,14 @@ public class UsuarioService {
         Usuario usuario = new Usuario();
         usuario.setEmail(dto.getEmail());
         usuario.setSenha(encoder.encode(dto.getSenha()));
-        usuario.setCargo(dto.getCargo());
+        usuario.setCargo(CargoUsuario.PROFESSOR);
 
         usuario = usuarioRepository.save(usuario);
 
-        if (dto.getCargo() == CargoUsuario.PROFESSOR) {
-            Professor professor = new Professor();
-            professor.setUsuario(usuario);
-            professor.setNome(usuario.getEmail());
-            professorRepository.save(professor);
-        }
+        Professor professor = new Professor();
+        professor.setUsuario(usuario);
+        professor.setNome(usuario.getEmail());
+        professorRepository.save(professor);
 
         return new UsuarioResponseDTO(usuario);
     }

@@ -3,6 +3,7 @@ package com.cefet.backend.dto;
 import com.cefet.backend.entity.Alternativa;
 import com.cefet.backend.entity.Atividade;
 import com.cefet.backend.entity.QuestaoAtividade;
+import com.cefet.backend.entity.TipoQuestao;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -30,7 +31,6 @@ public class AtividadeResponseDTO {
     private List<QuestaoAtividadeDTO> questoes;
     private String grupoId;
     private Integer quantidadeVersoes;
-    private String pdfOptionsJson;
 
     public AtividadeResponseDTO(Atividade atividade) {
         this.id = atividade.getId();
@@ -43,7 +43,6 @@ public class AtividadeResponseDTO {
         this.dataGeracao = atividade.getDataGeracao();
         this.grupoId = atividade.getGrupoId();
         this.quantidadeVersoes = atividade.getQuantidadeVersoes();
-        this.pdfOptionsJson = atividade.getPdfOptionsJson();
         if (atividade.getQuestoes() != null) {
             this.questoes = atividade.getQuestoes().stream()
                     .sorted(Comparator.comparing(QuestaoAtividade::getPosicao))
@@ -58,20 +57,20 @@ public class AtividadeResponseDTO {
     public static class QuestaoAtividadeDTO {
         private Long questaoAtividadeId;
         private Long questaoId;
+        private TipoQuestao tipoQuestao;
         private String foto;
         private String enunciado;
         private Integer posicao;
         private BigDecimal valorPontos;
-        private Boolean quebraPaginaAntes;
         private List<AlternativaDTO> alternativas;
 
         public QuestaoAtividadeDTO(QuestaoAtividade qa) {
             this.questaoAtividadeId = qa.getId();
             this.questaoId = qa.getQuestao().getId();
+            this.tipoQuestao = qa.getQuestao().getTipoQuestao();
             this.foto = qa.getQuestao().getFoto();
             this.enunciado = qa.getQuestao().getEnunciado();
             this.posicao = qa.getPosicao();
-            this.quebraPaginaAntes = qa.getQuebraPaginaAntes();
             this.valorPontos = qa.getValorPontos();
 
             if (qa.getQuestao().getAlternativas() != null) {

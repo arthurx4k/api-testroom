@@ -10,27 +10,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class QuestaoService {
 
-    @Autowired
-    private QuestaoRepository questaoRepository;
+    @Autowired private QuestaoRepository questaoRepository;
+    @Autowired private QuestaoAtividadeRepository questaoAtividadeRepository;
+    @Autowired private ProfessorRepository professorRepository;
+    @Autowired private CategoriaRepository categoriaRepository;
+    @Autowired private AlternativaRepository alternativaRepository;
 
-    @Autowired
-    private QuestaoAtividadeRepository questaoAtividadeRepository;
-
-    @Autowired
-    private ProfessorRepository professorRepository;
-
-    @Autowired
-    private CategoriaRepository categoriaRepository;
-
-    @Autowired
-    private AlternativaRepository alternativaRepository;
+    private boolean temAcessoCategoria(Professor professor, Categoria cat) {
+        if (cat.getCriador().getId().equals(professor.getId())) return true;
+        return cat.getCompartilhadaCom().stream()
+                .anyMatch(p -> p.getId().equals(professor.getId()));
+    }
 
     @Transactional
     public QuestaoResponseDTO criar(QuestaoRequestDTO dto, Long professorId) {
@@ -42,9 +39,8 @@ public class QuestaoService {
         }
         List<Categoria> categorias = categoriaRepository.findAllById(dto.getCategoriaIds());
         for (Categoria cat : categorias) {
-            if (!cat.getCriador().equals(professor) && !cat.getCompartilhadaCom().contains(professor)) {
-                throw new BusinessException(
-                        "Categoria " + cat.getId() + " não pertence a você e não foi compartilhada.");
+            if (!temAcessoCategoria(professor, cat)) {
+                throw new BusinessException("Categoria " + cat.getId() + " não pertence a você e não foi compartilhada.");
             }
         }
 
@@ -58,7 +54,6 @@ public class QuestaoService {
         questao.setFoto(dto.getFoto());
         questao.setEnunciado(dto.getEnunciado());
         questao.setCriadoPor(professor.getNome());
-
         questao = questaoRepository.save(questao);
 
         questao.setCategorias(new java.util.HashSet<>(categorias));
@@ -72,14 +67,12 @@ public class QuestaoService {
         }
 
         if (dto.getTipoQuestao() == TipoQuestao.UNICA_ESCOLHA) {
-            long countTrue = dto.getAlternativas().stream().filter(QuestaoRequestDTO.AlternativaDTO::getVerdadeira)
-                    .count();
+            long countTrue = dto.getAlternativas().stream()
+                    .filter(QuestaoRequestDTO.AlternativaDTO::getVerdadeira).count();
             if (countTrue != 1) {
-                throw new BusinessException(
-                        "Para questão de única escolha, deve haver exatamente uma alternativa verdadeira.");
+                throw new BusinessException("Para questão de única escolha, deve haver exatamente uma alternativa verdadeira.");
             }
         }
-
         return new QuestaoResponseDTO(questao);
     }
 
@@ -87,8 +80,8 @@ public class QuestaoService {
     public List<QuestaoResponseDTO> listarPorProfessor(Long professorId) {
         Professor professor = professorRepository.findById(professorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Professor não encontrado. Id: " + professorId));
-        List<Questao> questoes = questaoRepository.findByProfessor(professor);
-        return questoes.stream().map(QuestaoResponseDTO::new).collect(Collectors.toList());
+        return questaoRepository.findByProfessor(professor).stream()
+                .map(QuestaoResponseDTO::new).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -102,11 +95,10 @@ public class QuestaoService {
     public QuestaoResponseDTO atualizar(Long id, QuestaoRequestDTO dto, Long professorId) {
         Professor professor = professorRepository.findById(professorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Professor não encontrado. Id: " + professorId));
-
         Questao questao = questaoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Questão não encontrada. Id: " + id));
 
-        if (!questao.getProfessor().equals(professor)) {
+        if (!questao.getProfessor().getId().equals(professor.getId())) {
             throw new BusinessException("Apenas o criador pode editar esta questão.");
         }
 
@@ -115,7 +107,7 @@ public class QuestaoService {
         }
         List<Categoria> categorias = categoriaRepository.findAllById(dto.getCategoriaIds());
         for (Categoria cat : categorias) {
-            if (!cat.getCriador().equals(professor) && !cat.getCompartilhadaCom().contains(professor)) {
+            if (!temAcessoCategoria(professor, cat)) {
                 throw new BusinessException("Categoria " + cat.getId() + " não é acessível.");
             }
         }
@@ -142,11 +134,10 @@ public class QuestaoService {
         }
 
         if (dto.getTipoQuestao() == TipoQuestao.UNICA_ESCOLHA) {
-            long countTrue = dto.getAlternativas().stream().filter(QuestaoRequestDTO.AlternativaDTO::getVerdadeira)
-                    .count();
+            long countTrue = dto.getAlternativas().stream()
+                    .filter(QuestaoRequestDTO.AlternativaDTO::getVerdadeira).count();
             if (countTrue != 1) {
-                throw new BusinessException(
-                        "Para questão de única escolha, deve haver exatamente uma alternativa verdadeira.");
+                throw new BusinessException("Para questão de única escolha, deve haver exatamente uma alternativa verdadeira.");
             }
         }
 
@@ -160,11 +151,12 @@ public class QuestaoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
         Professor professor = professorRepository.findById(professorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Professor não encontrado."));
-        if (!categoria.getCriador().equals(professor) && !categoria.getCompartilhadaCom().contains(professor)) {
+
+        if (!temAcessoCategoria(professor, categoria)) {
             throw new BusinessException("Você não tem acesso a esta categoria.");
         }
-        List<Questao> questoes = questaoRepository.findByCategorias_Id(categoriaId);
-        return questoes.stream().map(QuestaoResponseDTO::new).toList();
+        return questaoRepository.findByCategorias_Id(categoriaId).stream()
+                .map(QuestaoResponseDTO::new).toList();
     }
 
     @Transactional(readOnly = true)
@@ -177,14 +169,18 @@ public class QuestaoService {
 
         List<Categoria> categorias = categoriaRepository.findAllById(categoriaIds);
         for (Categoria cat : categorias) {
-            if (!cat.getCriador().equals(professor) && !cat.getCompartilhadaCom().contains(professor)) {
+            if (!temAcessoCategoria(professor, cat)) {
                 throw new BusinessException("Sem acesso à categoria " + cat.getId());
             }
         }
 
         return questaoRepository.findDistinctByCategoriasIdIn(categoriaIds).stream()
-                .filter(q -> q.getProfessor().equals(professor)
-                        || q.getCategorias().stream().anyMatch(c -> c.getCompartilhadaCom().contains(professor)))
+                .filter(q -> {
+                    if (q.getProfessor().getId().equals(professor.getId())) return true;
+                    return q.getCategorias().stream().anyMatch(c ->
+                            c.getCompartilhadaCom().stream()
+                                    .anyMatch(p -> p.getId().equals(professor.getId())));
+                })
                 .map(QuestaoResponseDTO::new)
                 .collect(Collectors.toList());
     }
@@ -196,13 +192,12 @@ public class QuestaoService {
         Questao questao = questaoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Questão não encontrada. Id: " + id));
 
-        if (!questao.getProfessor().equals(professor)) {
+        if (!questao.getProfessor().getId().equals(professor.getId())) {
             throw new BusinessException("Apenas o criador pode excluir esta questão.");
         }
         if (questaoAtividadeRepository.existsByQuestao(questao)) {
             throw new BusinessException("Esta questão já está sendo usada em uma ou mais atividades.");
         }
-
         alternativaRepository.deleteByQuestao(questao);
         questaoRepository.delete(questao);
     }

@@ -2,6 +2,7 @@ package com.cefet.backend.controller;
 
 import com.cefet.backend.dto.CategoriaRequestDTO;
 import com.cefet.backend.dto.CategoriaResponseDTO;
+import com.cefet.backend.dto.CompartilhamentoCategoriaDTO;
 import com.cefet.backend.dto.CompartilhamentoPendenteDTO;
 import com.cefet.backend.service.CategoriaService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,11 +21,9 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class CategoriaController {
 
-    @Autowired
-    private CategoriaService categoriaService;
+    @Autowired private CategoriaService categoriaService;
 
     @PostMapping
-    @Operation(summary = "Criar uma nova categoria")
     public ResponseEntity<CategoriaResponseDTO> criar(
             @Valid @RequestBody CategoriaRequestDTO dto,
             @RequestParam Long professorId) {
@@ -33,20 +32,16 @@ public class CategoriaController {
     }
 
     @GetMapping
-    @Operation(summary = "Listar categorias acessíveis (próprias + compartilhadas)")
-    public ResponseEntity<List<CategoriaResponseDTO>> listarAcessiveis(
-            @RequestParam Long professorId) {
+    public ResponseEntity<List<CategoriaResponseDTO>> listarAcessiveis(@RequestParam Long professorId) {
         return ResponseEntity.ok(categoriaService.listarAcessiveis(professorId));
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Buscar categoria por ID")
     public ResponseEntity<CategoriaResponseDTO> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(categoriaService.buscarPorId(id));
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Atualizar uma categoria")
     public ResponseEntity<CategoriaResponseDTO> atualizar(
             @PathVariable Long id,
             @Valid @RequestBody CategoriaRequestDTO dto,
@@ -55,16 +50,13 @@ public class CategoriaController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir uma categoria")
-    public ResponseEntity<Void> excluir(
-            @PathVariable Long id,
-            @RequestParam Long professorId) {
+    public ResponseEntity<Void> excluir(@PathVariable Long id, @RequestParam Long professorId) {
         categoriaService.excluir(id, professorId);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{categoriaId}/compartilhar/{professorAlvoId}")
-    @Operation(summary = "Remover compartilhamento de categoria")
+    @Operation(summary = "Remover compartilhamento de categoria (aceito ou pendente)")
     public ResponseEntity<Void> descompartilhar(
             @PathVariable Long categoriaId,
             @PathVariable Long professorAlvoId,
@@ -80,6 +72,13 @@ public class CategoriaController {
             @RequestParam Long professorAlvoId) {
         categoriaService.compartilhar(id, professorId, professorAlvoId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}/compartilhamentos")
+    @Operation(summary = "Listar todos os compartilhamentos (pendentes/aceitos/recusados) de uma categoria")
+    public ResponseEntity<List<CompartilhamentoCategoriaDTO>> listarCompartilhamentos(
+            @PathVariable Long id, @RequestParam Long professorId) {
+        return ResponseEntity.ok(categoriaService.listarCompartilhamentos(id, professorId));
     }
 
     @GetMapping("/compartilhamentos-pendentes")
